@@ -8,6 +8,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.List;
 
@@ -54,11 +58,15 @@ public class Csv2TableModel implements ActionListener {
 
 			var chart = createAndShowGUI(ourDataModel);
 
+			// TODO: das hier zu deinem pfad ändern
+			var pathToCsv = "/home/tobi/projects/test/java_test/SwingCovidStatistics/data/covid2.csv";
+			var infos = createInformationPanel(pathToCsv, ourDataModel);
+
 			//mainFram befüllen
 			upperRow.add(new JScrollPane(chart));
 			upperRow.add(topRight);
 			mainLayout.add(upperRow);
-			mainLayout.add(new JScrollPane(mid));
+			mainLayout.add(new JScrollPane(infos));
 			//mainLayout.add(panelUnten, BorderLayout.PAGE_END);
 
 			mainFrame.setContentPane(mainLayout);
@@ -140,7 +148,7 @@ public class Csv2TableModel implements ActionListener {
 	 * @return A DefaultTableModel containing the CSV values as type String
 	 */
 	public static DefaultTableModel createTableModel(Reader in, Vector<Object> headers) {
-		DefaultTableModel model = null;
+		DefaultTableModel model;
 		Scanner s = null;
 
 		try {
@@ -164,6 +172,31 @@ public class Csv2TableModel implements ActionListener {
 		} finally {
 			s.close();
 		}
+	}
+
+	public static JPanel createInformationPanel(String filePath, DefaultTableModel data) throws IOException {
+		Path fPath = Path.of(filePath);
+		var fileInfo = Files.readAttributes(fPath, BasicFileAttributes.class);
+		var panel = new JPanel();
+		var box = Box.createVerticalBox();
+		var name = new JLabel("Name: " + fPath.getFileName());
+		name.setFont(new Font("Arial", Font.PLAIN, 20));
+		var path = new JLabel("Pfad: " + filePath);
+		path.setFont(new Font("Arial", Font.PLAIN, 20));
+		var lastChangeDate = new JLabel("Letztes Änderungsdatum: " + fileInfo.lastModifiedTime());
+		lastChangeDate.setFont(new Font("Arial", Font.PLAIN, 20));
+		var fileSize = new JLabel("Dateigröße: " + fileInfo.size() + " bytes");
+		fileSize.setFont(new Font("Arial", Font.PLAIN, 20));
+		var amountData = new JLabel("Anzahl der Datenätze: " + data.getRowCount());
+		amountData.setFont(new Font("Arial", Font.PLAIN, 20));
+
+		box.add(name);
+		box.add(path);
+		box.add(lastChangeDate);
+		box.add(fileSize);
+		box.add(amountData);
+		panel.add(box);
+		return panel;
 	}
 
 	
